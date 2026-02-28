@@ -1,65 +1,66 @@
-# restart-wake extension (v4)
+# restart-wake
 
-Auto-wakes agents after a gateway tool restart (`gateway({ action: "restart" })`).
+Auto-wakes agents after a gateway restart by replaying their active session. Ensures agents resume in-progress work immediately after a `gateway({ action: "restart" })` without manual intervention.
 
 ## What it does
 
-1. **Consumes the restart sentinel** before the built-in handler - suppresses the noisy outbound "Gateway restart" message in Discord
-2. **Runs a full agent turn** via `agentCommand` (same mechanism as boot-md) in the session that triggered the restart
-3. Injects the restart note/reason as a `[System Message]` so the agent has context to resume work
+**At startup** (service `start`):
+1. Consumes the built-in restart sentinel to suppress the default noisy restart message
+2. Reads per-session sentinel files written before the restart
+3. For each session, waits `delayMs` then calls `agentCommand` to run a full agent turn with a `[System Message]` containing the restart reason and a directive to resume work
+4. Falls back to the owner DM session if the original session key fails to route
 
-## How it works
+**At runtime** (fs.watch):
+Watches for new `restart-sentinel.json` writes and copies them to per-session files under `~/.openclaw/restart-sentinels/`. This captures the session key before the process restarts.
 
-```
-gateway tool restart
-  → writeRestartSentinel (includes sessionKey, note, reason)
-  → SIGUSR1 → process restarts
-  → restart-wake plugin starts
-  → consumeSentinel() reads + deletes sentinel file (before built-in 750ms consumer)
-  → setTimeout(delayMs) waits for gateway to fully initialize
-  → agentCommand({ message, sessionKey, deliver: true }) runs a full agent turn
-  → agent auto-wakes in the correct session with restart context
-```
+Sentinels are also written to `/workspace/.restart-sentinels/` (a volume-mounted path) so they survive container recreates.
 
-## Key behaviors
+## Install
 
-- **Only fires on sentinel restarts** - fresh container starts (`docker compose up`) produce no sentinel, so the extension skips wake. This is intentional: fresh starts should follow normal boot-md flow.
-- **Session-aware** - the sentinel captures which session triggered the restart (DM, channel, etc.) and the wake targets that exact session.
-- **Uses `agentCommand` from pi-embedded** - this is the same function boot-md uses. It runs a real agent turn with tool access, not just a system event queue injection.
-
-## Config
-
-In `openclaw.json` under `plugins.config`:
+Copy the extension directory into your agent's extensions folder and add to `openclaw.json`:
 
 ```json
-"restart-wake": {
-  "enabled": true,
-  "delayMs": 3000
+{
+  "plugins": {
+    "restart-wake": {
+      "enabled": true,
+      "delayMs": 3000
+    }
+  }
 }
 ```
 
-- `enabled` - toggle the extension (default: `true`)
-- `delayMs` - milliseconds to wait after startup before running the agent turn (default: `3000`). Needs to be long enough for Discord login, hooks, etc.
+## Config options
 
-## Deployment
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| `enabled` | boolean | `true` | Enable the plugin |
+| `delayMs` | number | `3000` | Milliseconds to wait after gateway startup before running agent turns. Needs to be long enough for Discord login and hook registration |
 
-Shared extension mounted into agent containers via docker-compose volume. Place in your extensions directory.
+## Environment variables
 
-Both Clud and Snoopy have a copy at `config/extensions/restart-wake/`.
+| Variable | Description |
+|----------|-------------|
+| `OPENCLAW_STATE_DIR` | Override state directory (default: `~/.openclaw`) |
+| `FALLBACK_SESSION_KEY` | Session to use if primary session routing fails (default: `agent:main:discord:direct:owner`) |
 
-## Why not enqueueSystemEvent / requestHeartbeatNow?
+## How the restart flow works
 
-These were tried in v1-v3 and failed:
+```
+gateway({ action: "restart" })
+  → writes restart-sentinel.json (includes sessionKey, note, reason)
+  → SIGUSR1 → process exits
+  → process restarts → restart-wake plugin starts
+  → consumeBuiltinSentinel() suppresses default restart message
+  → consumeSessionSentinels() reads per-session files
+  → setTimeout(delayMs) waits for full gateway init
+  → agentCommand({ sessionKey, message: "[System Message] ...resume..." })
+  → agent wakes in the correct session and resumes work
+```
 
-| Approach | Problem |
-|----------|---------|
-| `requestHeartbeatNow` (v1) | Heartbeat runs in its own session, doesn't trigger the DM/channel session |
-| `enqueueSystemEvent` (v2) | Queues the event but nothing drains the queue until the next inbound message |
-| Both combined (v3) | Same issue - heartbeat session ≠ DM session, queue sits undrained |
-| `agentCommand` (v4) ✅ | Runs a full agent turn in the target session, processes tools, delivers response |
+## Notes
 
-## Gotchas
-
-- **SIGUSR1 doesn't reload CJS modules** - after editing the extension, you need `docker compose down && up` (not just restart) to load new code
-- **Raw `kill -USR1 1`** doesn't write a sentinel - only the gateway tool restart does. Raw SIGUSR1 = "fresh start" from the extension's perspective
-- The built-in sentinel consumer runs at ~750ms. Our extension consumes at startup (~0ms), winning the race
+- **Only fires on sentinel restarts.** A fresh `docker compose up` produces no sentinel - the plugin skips wake. This is intentional.
+- Raw `kill -USR1 1` does not write a sentinel. Only the gateway tool restart does.
+- After editing this extension, `docker compose down && up` is required (SIGUSR1 does not reload CJS modules)
+- If `agentCommand` or `createDefaultDeps` are not found in the OpenClaw dist, the plugin logs a warning and skips wake
