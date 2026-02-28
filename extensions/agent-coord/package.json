@@ -1,0 +1,12 @@
+{
+  "name": "agent-coord",
+  "version": "1.0.0",
+  "description": "Redis-based multi-agent coordination plugin",
+  "main": "index.js",
+  "clawdbot": {
+    "extensions": ["index.js"]
+  },
+  "dependencies": {
+    "redis": "^4.6.0"
+  }
+}

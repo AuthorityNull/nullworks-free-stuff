@@ -1,0 +1,18 @@
+{
+  "id": "restart-wake",
+  "name": "Restart Wake",
+  "version": "1.0.0",
+  "description": "Triggers immediate heartbeat after gateway restart so agents auto-wake",
+  "main": "index.js",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean", "default": true },
+      "delayMs": { "type": "number", "default": 2500 }
+    }
+  },
+  "config": {
+    "enabled": true,
+    "delayMs": 2500
+  }
+}

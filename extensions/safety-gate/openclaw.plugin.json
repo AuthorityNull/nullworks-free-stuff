@@ -1,0 +1,22 @@
+{
+  "id": "safety-gate",
+  "name": "Safety Gate",
+  "main": "index.js",
+  "version": "1.0.0",
+  "description": "Rate-limits restarts and blocks dangerous docker operations",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean", "default": true },
+      "minRestartIntervalMs": { "type": "number", "default": 180000 },
+      "protectedAgents": {
+        "type": "array",
+        "items": { "type": "string" },
+        "default": ["clawdbot"]
+      }
+    }
+  },
+  "config": {
+    "enabled": true
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "minion-lifecycle",
+  "version": "2.0.0",
+  "description": "Auto-posts sub-agent spawn/complete events to Discord webhook",
+  "main": "index.js"
+}

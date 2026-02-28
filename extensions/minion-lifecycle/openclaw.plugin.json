@@ -1,0 +1,19 @@
+{
+  "id": "minion-lifecycle",
+  "name": "Minion Lifecycle",
+  "version": "3.0.0",
+  "description": "Auto-posts sub-agent spawn, completion, and progress events to Discord webhook",
+  "main": "index.js",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean" },
+      "webhookUrl": { "type": "string" },
+      "agentLabel": { "type": "string" },
+      "progressPollMs": { "type": "number", "default": 15000 }
+    }
+  },
+  "config": {
+    "enabled": true
+  }
+}

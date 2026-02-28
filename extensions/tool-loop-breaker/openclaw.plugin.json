@@ -1,0 +1,15 @@
+{
+  "id": "tool-loop-breaker",
+  "name": "Tool Loop Breaker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "description": "Aborts agent session after too many consecutive tool errors to prevent rate limit exhaustion",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean", "default": true },
+      "maxConsecutiveErrors": { "type": "number", "default": 5 },
+      "maxToolCalls": { "type": "number", "default": 35 }
+    }
+  }
+}

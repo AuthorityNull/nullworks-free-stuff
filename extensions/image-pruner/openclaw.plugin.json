@@ -1,0 +1,22 @@
+{
+  "id": "image-pruner",
+  "name": "Image Pruner",
+  "version": "1.0.0",
+  "description": "Strips base64 images from tool results to prevent session bloat",
+  "main": "index.js",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean", "default": true },
+      "pruneTools": {
+        "type": "array",
+        "items": { "type": "string" },
+        "default": ["browser", "image", "nodes"]
+      }
+    }
+  },
+  "config": {
+    "enabled": true,
+    "pruneTools": ["browser", "image", "nodes"]
+  }
+}

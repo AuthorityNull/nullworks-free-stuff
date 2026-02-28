@@ -1,0 +1,13 @@
+{
+  "name": "mem0-sidecar",
+  "version": "1.0.0",
+  "private": true,
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "dependencies": {
+    "mem0ai": "^2.2.3"
+  }
+}

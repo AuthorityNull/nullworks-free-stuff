@@ -1,0 +1,25 @@
+{
+  "id": "agent-coord",
+  "name": "Agent Coordination",
+  "version": "9.0.0",
+  "description": "Multi-agent channel coordination via keyword routing and Redis ownership",
+  "main": "index.js",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean" },
+      "redisUrl": { "type": "string" },
+      "keyPrefix": { "type": "string" },
+      "agentId": { "type": "string" },
+      "discordUserId": { "type": "string" },
+      "agentNames": { "type": "array", "items": { "type": "string" } },
+      "ownerTtl": { "type": "number" }
+    }
+  },
+  "config": {
+    "enabled": true,
+    "redisUrl": "redis://localhost:6379",
+    "keyPrefix": "agent-coord:",
+    "ownerTtl": 300
+  }
+}

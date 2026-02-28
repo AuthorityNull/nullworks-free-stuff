@@ -1,0 +1,12 @@
+{
+  "id": "credential-guard",
+  "name": "credential-guard",
+  "main": "index.js",
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "enabled": { "type": "boolean" }
+    }
+  }
+}

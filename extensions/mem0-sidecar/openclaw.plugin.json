@@ -1,0 +1,22 @@
+{
+  "id": "mem0-sidecar",
+  "name": "Mem0 Sidecar",
+  "description": "Auto-capture and auto-recall via Mem0 OSS alongside built-in memory system",
+  "version": "1.0.0",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "userId": { "type": "string" },
+      "autoRecall": { "type": "boolean" },
+      "autoCapture": { "type": "boolean" },
+      "topK": { "type": "number" },
+      "searchThreshold": { "type": "number" },
+      "customInstructions": { "type": "string" },
+      "embedder": { "type": "object" },
+      "vectorStore": { "type": "object" },
+      "llm": { "type": "object" },
+      "historyDbPath": { "type": "string" }
+    }
+  }
+}
