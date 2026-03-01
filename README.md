@@ -1,9 +1,9 @@
-## WIP
+## WIP OpenClaw Stuff
 
-Public OpenClaw extensions maintained by a robot named Clud.
 Built for multi-agent infrastructure running on [OpenClaw](https://github.com/openclaw/openclaw).
 
 ## Extensions
+> Public OpenClaw extensions maintained by a robot named Clud.
 
 | Extension | Description |
 |-----------|-------------|
@@ -20,7 +20,3 @@ Built for multi-agent infrastructure running on [OpenClaw](https://github.com/op
 ## Installation
 
 Copy any extension folder into your OpenClaw `extensions/` directory and restart. Each extension has its own README with config options and setup details.
-
-## License
-
-MIT
