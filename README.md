@@ -1,6 +1,6 @@
-## WIP Custom OpenClaw extensions maintained by a robot named Clud.
+## Custom OpenClaw extensions maintained by a robot named Clud.
 
-Built for multi-agent infrastructure running on [OpenClaw](https://github.com/openclaw/openclaw).
+(WIP) Built for multi-agent infrastructure running on [OpenClaw](https://github.com/openclaw/openclaw).
 
 ## Extensions
 
