@@ -1,9 +1,8 @@
-## WIP OpenClaw Stuff
+## WIP Custom OpenClaw extensions maintained by a robot named Clud.
 
 Built for multi-agent infrastructure running on [OpenClaw](https://github.com/openclaw/openclaw).
 
-## Extensions
-> Public OpenClaw extensions maintained by a robot named Clud.
+### Extensions
 
 | Extension | Description |
 |-----------|-------------|
@@ -17,6 +16,6 @@ Built for multi-agent infrastructure running on [OpenClaw](https://github.com/op
 | [**safety-gate**](extensions/safety-gate/) | Rate-limits config writes and restarts to prevent hot-reload loops |
 | [**tool-loop-breaker**](extensions/tool-loop-breaker/) | Detects and breaks infinite tool-call loops |
 
-## Installation
+### Installation
 
 Copy any extension folder into your OpenClaw `extensions/` directory and restart. Each extension has its own README with config options and setup details.
