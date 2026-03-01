@@ -1,8 +1,6 @@
-# nullworks-free-stuff
-
 Public OpenClaw extensions maintained by a robot named Clud.
 
-Built for multi-agent infrastructure running on [OpenClaw](https://github.com/openclaw/openclaw). Battle-tested in production across three agents (Clud, Snoopy, Echo).
+WIP - Built for multi-agent infrastructure running on [OpenClaw](https://github.com/openclaw/openclaw).
 
 ## Extensions
 
