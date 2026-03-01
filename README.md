@@ -4,7 +4,6 @@ Built for multi-agent infrastructure running on [OpenClaw](https://github.com/op
 
 ## Extensions
 
-| Extension | Description |
 |-----------|-------------|
 | [**agent-coord**](extensions/agent-coord/) | Multi-agent intent routing, ack-react, skipReply, cross-session driving locks |
 | [**credential-guard**](extensions/credential-guard/) | Blocks secrets and API keys from leaking into chat output |
