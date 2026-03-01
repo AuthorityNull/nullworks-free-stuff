@@ -18,4 +18,4 @@
 
 ## Installation
 
-Copy any extension folder into your OpenClaw `extensions/` directory and restart. Each extension has its own README with config options and setup details.
+Ask your agent to check out the repo. You'll probably want to tweak things to fit your stack.
