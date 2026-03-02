@@ -1,0 +1,147 @@
+{
+  "id": "model-prompt-profiles",
+  "name": "Model Prompt Profiles",
+  "version": "1.3.0",
+  "main": "index.js",
+  "description": "Model-aware prompt profile routing with optional per-model prompt-tree system prompt",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": true
+      },
+      "instanceId": {
+        "type": "string",
+        "default": "snoopy"
+      },
+      "strictInstanceMatch": {
+        "type": "boolean",
+        "default": false
+      },
+      "allowedAgentIds": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [
+          "main"
+        ]
+      },
+      "maxPrependChars": {
+        "type": "number",
+        "default": 4000
+      },
+      "maxSystemPromptChars": {
+        "type": "number",
+        "default": 12000
+      },
+      "allowSystemPromptOverride": {
+        "type": "boolean",
+        "default": false
+      },
+      "promptTreeBaseDirs": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": []
+      },
+      "profiles": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "prependContext": {
+              "type": "string"
+            },
+            "systemPrompt": {
+              "type": "string"
+            },
+            "providerOverride": {
+              "type": "string"
+            },
+            "modelOverride": {
+              "type": "string"
+            },
+            "promptTreeDir": {
+              "type": "string"
+            },
+            "promptFiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "promptJoiner": {
+              "type": "string"
+            }
+          }
+        },
+        "default": {}
+      },
+      "rules": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "profile": {
+              "type": "string"
+            },
+            "promptRegex": {
+              "type": "string"
+            },
+            "sessionKeyRegex": {
+              "type": "string"
+            },
+            "modelRegex": {
+              "type": "string"
+            },
+            "providerOverride": {
+              "type": "string"
+            },
+            "modelOverride": {
+              "type": "string"
+            }
+          }
+        },
+        "default": []
+      },
+      "defaultPromptFilesMain": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [
+          "AGENTS.md",
+          "SOUL.md",
+          "TOOLS.md",
+          "IDENTITY.md"
+        ]
+      },
+      "defaultPromptFilesSubagent": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [
+          "AGENTS.md",
+          "SOUL.md",
+          "TOOLS.md",
+          "IDENTITY.md"
+        ]
+      },
+      "defaultPromptJoinerMain": {
+        "type": "string",
+        "default": "\n\n"
+      },
+      "defaultPromptJoinerSubagent": {
+        "type": "string",
+        "default": "\n\n"
+      }
+    }
+  }
+}

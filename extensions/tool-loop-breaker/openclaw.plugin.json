@@ -1,15 +1,19 @@
 {
   "id": "tool-loop-breaker",
   "name": "Tool Loop Breaker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.js",
-  "description": "Aborts agent session after too many consecutive tool errors to prevent rate limit exhaustion",
+  "description": "Guards against runaway tool loops with checkpoint and hard-stop thresholds",
   "configSchema": {
     "type": "object",
+    "additionalProperties": false,
     "properties": {
       "enabled": { "type": "boolean", "default": true },
       "maxConsecutiveErrors": { "type": "number", "default": 5 },
-      "maxToolCalls": { "type": "number", "default": 35 }
+      "checkpointAtCalls": { "type": "number", "default": 30 },
+      "warnAtCalls": { "type": "number", "default": 55 },
+      "maxToolCalls": { "type": "number", "default": 69 },
+      "checkpointMemoryPath": { "type": "string", "default": "/workspace/MEMORY.md" }
     }
   }
 }

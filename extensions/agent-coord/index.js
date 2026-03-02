@@ -17,7 +17,7 @@
 const { createClient } = require('redis');
 const { decideRouting, classifyIntent, AGENT_IDS, AGENT_ID_SET, ID_TO_NAME } = require('./decide');
 
-const VERSION = 'v3.6';
+const VERSION = 'v3.7';
 
 // ---------------------------------------------------------------------------
 // Shared channels - only coordinate in these
@@ -382,7 +382,13 @@ async function handleMessageReceived(event, ctx) {
 
   const content = event?.content || '';
   const senderId = event?.metadata?.senderId || '';
-  const senderIsAgent = AGENT_ID_SET.has(senderId);
+  const senderUsername = (event?.metadata?.senderUsername || event?.metadata?.username || '').toLowerCase();
+  const senderNameNoDiscrim = senderUsername.replace(/#\d+$/, '');
+  const senderIsKnownAgentName = !senderId && (senderNameNoDiscrim === 'clud' || senderNameNoDiscrim === 'snoopy' || senderNameNoDiscrim === 'echo');
+  const senderIsAgent = AGENT_ID_SET.has(senderId) || senderIsKnownAgentName;
+  if (!AGENT_ID_SET.has(senderId) && senderIsKnownAgentName) {
+    logger?.warn?.('agent-coord ' + VERSION + ': senderIsAgent fallback by username=' + senderUsername + ' channel=' + channelId);
+  }
   const thisAgent = config.thisAgent;
   if (!thisAgent) return;
 
@@ -391,10 +397,12 @@ async function handleMessageReceived(event, ctx) {
     content,
     senderId,
     senderIsAgent,
+    senderUsername,
     channelId,
     messageId: event?.metadata?.messageId || null,
     replyToSenderId: event?.metadata?.replyToSenderId || null,
     replyToId: event?.metadata?.reply_to_id || event?.metadata?.replyToId || null,
+    rawMentions: event?.metadata?.mentions || null,
     ts: Date.now(),
   };
   messageContexts.set(channelId, msgCtx);
@@ -474,22 +482,44 @@ async function handleBeforeAgentStart(event, ctx) {
 
   logger?.info?.('agent-coord ' + VERSION + ': [' + thisAgent + '] before_agent_start: computing routing for msgId=' + (messageId || 'none'));
 
-  // --- Resolve @mentions ---
-  const agentMentions = [];
-  for (const [name, id] of Object.entries(AGENT_IDS)) {
-    if (id && new RegExp('<@!?' + id + '>').test(content)) agentMentions.push(name);
-  }
-
-  // --- Resolve weighted name-task mentions ---
+  // --- Resolve @mentions / direct agent-name mentions ---
   const AGENT_NAME_ALIASES = {
     clud: ['clud', 'cloud', 'big clud'],
     snoopy: ['snoopy'],
     echo: ['echo'],
   };
+
+  const explicitDiscordMentions = [];
+  for (const [name, id] of Object.entries(AGENT_IDS)) {
+    if (id && new RegExp('<@!?' + id + '>').test(content)) explicitDiscordMentions.push(name);
+  }
+
+  const explicitNameMentions = [];
+  for (const [agentName, aliases] of Object.entries(AGENT_NAME_ALIASES)) {
+    for (const alias of aliases) {
+      const a = escapeRegex(alias);
+      const directNameMention = new RegExp('(?:^|[\s,;:()\[\]{}])@?' + a + '(?:$|[\s,;:!?.()\[\]{}])', 'i');
+      if (directNameMention.test(content)) {
+        explicitNameMentions.push(agentName);
+        break;
+      }
+    }
+  }
+
+  const agentMentions = Array.from(new Set([...explicitDiscordMentions, ...explicitNameMentions]));
+
+  // --- Resolve weighted name-task mentions ---
   const weightedNameHits = [];
   for (const [agentName, aliases] of Object.entries(AGENT_NAME_ALIASES)) {
     if (aliases.some((alias) => hasWeightedNameTaskRequest(content, alias))) {
       weightedNameHits.push(agentName);
+    }
+  }
+
+  if (senderIsAgent && agentMentions.length === 0) {
+    const looksLikePing = /<@!?\d+>/.test(content) || /@\w+/.test(content);
+    if (looksLikePing) {
+      logger?.warn?.('agent-coord ' + VERSION + ': senderIsAgent but no resolved agentMentions; msgId=' + (messageId || 'none') + ' sender=' + (senderId || msgCtx.senderUsername || 'unknown') + ' rawMentions=' + JSON.stringify(msgCtx.rawMentions || null));
     }
   }
 

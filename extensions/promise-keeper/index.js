@@ -37,6 +37,17 @@ const FIX_PROMISE_PATTERNS = [
   /\bthis (?:time|won'?t) be different\b/i,
 ];
 
+// "Continuation promises" - agent says it will continue but turn ended (likely tool limit)
+const CONTINUATION_PATTERNS = [
+  /\bcontinuing now\b/i,
+  /\bpicking (?:this|it) up\b/i,
+  /\bresuming (?:now|work|the task|this)\b/i,
+  /\blet me continue\b/i,
+  /\bwill continue in (?:the )?next/i,
+  /\bcontinuing (?:in )?(?:the )?next/i,
+];
+const HIGH_TOOL_CALL_THRESHOLD = 25;
+
 // Tools that count as "writing a fix to disk"
 const FIX_TOOL_NAMES = new Set(['write', 'edit', 'exec']);
 
@@ -47,6 +58,10 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bif you're waiting/i,
   /\bwhile waiting/i,
 ];
+
+const INTERNAL_SESSION_MARKERS = [':heartbeat', ':subagent:', ':system', ':isolated:'];
+const INTERNAL_MESSAGE_MARKERS = [/^\[Inter-session message\]/i, /sourceTool=sessions_send/i, /\[INTERNAL HEARTBEAT WAKE\]/i];
+const PUSH_COORDINATION_TOOLS = new Set(['sessions_send', 'sessions_spawn', 'subagents']);
 
 let pluginApi = null;
 let agentFnsCache = null;
@@ -138,6 +153,28 @@ function hasFixToolInMessages(messages) {
   return false;
 }
 
+function countToolCalls(messages) {
+  let count = 0;
+  if (!Array.isArray(messages)) return count;
+  for (const msg of messages) {
+    if (msg.role === 'assistant' && Array.isArray(msg.content)) {
+      for (const block of msg.content) {
+        if (block.type === 'tool_use' || block.type === 'function') count++;
+      }
+    }
+  }
+  return count;
+}
+
+function hasContinuationPattern(text) {
+  if (!text || typeof text !== 'string') return null;
+  for (const pattern of CONTINUATION_PATTERNS) {
+    const match = text.match(pattern);
+    if (match) return match[0];
+  }
+  return null;
+}
+
 function getLastAssistantText(messages) {
   if (!Array.isArray(messages)) return '';
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -177,6 +214,39 @@ function hasCronInMessages(messages) {
   return false;
 }
 
+
+function isInternalSession(sessionKey) {
+  if (!sessionKey || typeof sessionKey !== 'string') return false;
+  const s = sessionKey.toLowerCase();
+  return INTERNAL_SESSION_MARKERS.some((m) => s.includes(m));
+}
+
+function hasInternalMessageMarkers(text) {
+  if (!text || typeof text !== 'string') return false;
+  return INTERNAL_MESSAGE_MARKERS.some((re) => re.test(text));
+}
+
+function hasPushCoordinationTools(messages) {
+  if (!Array.isArray(messages)) return false;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = messages[i];
+    if (msg.role === 'user' || msg.role === 'system') break;
+    if (msg.role === 'assistant' && Array.isArray(msg.content)) {
+      for (const block of msg.content) {
+        const name = block?.name;
+        if ((block.type === 'tool_use' || block.type === 'function') && PUSH_COORDINATION_TOOLS.has(name)) return true;
+      }
+    }
+    if (Array.isArray(msg.tool_calls)) {
+      for (const tc of msg.tool_calls) {
+        const name = tc.function?.name || tc.name;
+        if (PUSH_COORDINATION_TOOLS.has(name)) return true;
+      }
+    }
+  }
+  return false;
+}
+
 async function sendNudge(sessionKey, nudgeText) {
   const fns = await getAgentFns();
   if (!fns.agentCommand || !fns.createDefaultDeps) {
@@ -203,7 +273,7 @@ module.exports = {
   
   register(api, cfg) {
     pluginApi = api;
-    api.logger?.info?.('promise-keeper v1.2.1: registered');
+    api.logger?.info?.('promise-keeper v1.4.0: registered');
     
     // Pre-warm the agent functions cache
     getAgentFns().then(fns => {
@@ -227,14 +297,53 @@ module.exports = {
         if (!event?.success) return;
         const sessionKey = ctx?.sessionKey;
         if (!sessionKey) return;
-        
+
+        if (isInternalSession(sessionKey)) {
+          api.logger?.info?.(`promise-keeper: skipped internal session ${sessionKey}`);
+          return;
+        }
+
         const messages = event.messages;
+        if (hasPushCoordinationTools(messages)) {
+          api.logger?.info?.(`promise-keeper: skipped push-coordination turn ${sessionKey}`);
+          return;
+        }
+
         const assistantText = getLastAssistantText(messages);
         if (!assistantText) return;
-        
+
+        if (hasInternalMessageMarkers(assistantText)) {
+          api.logger?.info?.(`promise-keeper: skipped internal marker text in ${sessionKey}`);
+          return;
+        }
+
         const trimmed = assistantText.trim();
         if (trimmed === 'HEARTBEAT_OK' || trimmed === 'NO_REPLY') return;
         
+        // Check for continuation promises (agent claimed it would continue but turn ended)
+        const contMatch = hasContinuationPattern(assistantText);
+        if (contMatch) {
+          const toolCount = countToolCalls(messages);
+          if (toolCount >= HIGH_TOOL_CALL_THRESHOLD) {
+            const last = recentNudges.get(sessionKey);
+            if (!last || (Date.now() - last) >= NUDGE_COOLDOWN_MS) {
+              recentNudges.set(sessionKey, Date.now());
+              api.logger?.warn?.(
+                `promise-keeper: BROKEN CONTINUATION in ${sessionKey}: "${contMatch}" after ${toolCount} tool calls. Turn ended without completing.`
+              );
+              const nudgeText =
+                `[promise-keeper] You said "${contMatch}" but your turn ended (${toolCount} tool calls hit). ` +
+                `The user saw your promise but you did NOT continue. Either: ` +
+                `(a) actually resume the work now, or ` +
+                `(b) tell the user honestly that the tool limit stopped you and you need another turn.`;
+              const sent = await sendNudge(sessionKey, nudgeText);
+              api.logger?.info?.(`promise-keeper: continuation nudge sent=${sent}`);
+            }
+            cronCalledThisTurn.delete(sessionKey);
+            return;
+          }
+        }
+
         // Check for fix promises first (higher priority)
         const fixMatch = hasFixPromisePattern(assistantText);
         if (fixMatch) {

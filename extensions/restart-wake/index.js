@@ -163,7 +163,7 @@ function startWatcher(logger) {
 /**
  * Fallback session key: owner DM session (most likely to have a valid delivery target).
  */
-const FALLBACK_SESSION_KEY = process.env.FALLBACK_SESSION_KEY || 'agent:main:discord:direct:owner';
+const FALLBACK_SESSION_KEY = process.env.FALLBACK_SESSION_KEY || null;
 
 /**
  * Process a single session sentinel: notify + silent agent turn.

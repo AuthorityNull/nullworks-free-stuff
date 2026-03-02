@@ -83,6 +83,8 @@ const NOISE_PATTERNS = [
   /continuity[-.]maintain/i,
   /continuity[-.]metrics/i,
   /^Read \/workspace\/tasks\/current\.md/,
+  /^Read HEARTBEAT\.md if it exists/i,
+  /If nothing needs attention, reply HEARTBEAT_OK/i,
 ];
 
 function isNoiseMessage(text: string): boolean {
@@ -411,7 +413,7 @@ const plugin: OpenClawPlugin = {
           },
           required: ["content"],
         },
-        async execute(args: { content: string }) {
+        async execute(toolCallId: string, args: { content: string }, signal?: AbortSignal, onUpdate?: any) {
           if (disabledDueToError) {
             return {
               content:
@@ -464,7 +466,7 @@ const plugin: OpenClawPlugin = {
           },
           required: ["memoryId"],
         },
-        async execute(args: { memoryId: string }) {
+        async execute(toolCallId: string, args: { memoryId: string }, signal?: AbortSignal, onUpdate?: any) {
           if (disabledDueToError) {
             return {
               content:
@@ -511,7 +513,7 @@ const plugin: OpenClawPlugin = {
             },
           },
         },
-        async execute(args: { limit?: number }) {
+        async execute(toolCallId: string, args: { limit?: number }, signal?: AbortSignal, onUpdate?: any) {
           if (disabledDueToError) {
             return {
               content:
@@ -571,6 +573,12 @@ const plugin: OpenClawPlugin = {
 
         const sessionId = ctx?.sessionKey ?? undefined;
         if (sessionId) currentSessionId = sessionId;
+
+        // Skip heartbeat lane entirely - avoids mem0 JSON parse noise from HEARTBEAT_OK replies
+        if (sessionId && /:heartbeat(?:$|:)/i.test(sessionId)) {
+          api.logger.info("mem0-sidecar: skipping capture - heartbeat session");
+          return;
+        }
 
         try {
           const mem = await ensureMemory(cfg, api.logger);
@@ -673,6 +681,12 @@ const plugin: OpenClawPlugin = {
 
         const sessionId = ctx?.sessionKey ?? undefined;
         if (sessionId) currentSessionId = sessionId;
+
+        // Skip heartbeat lane entirely - avoids mem0 JSON parse noise from HEARTBEAT_OK replies
+        if (sessionId && /:heartbeat(?:$|:)/i.test(sessionId)) {
+          api.logger.info("mem0-sidecar: skipping capture - heartbeat session");
+          return;
+        }
 
         try {
           // Step 1: Extract and format messages
