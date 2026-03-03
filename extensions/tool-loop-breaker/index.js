@@ -16,11 +16,17 @@ let maxConsecutiveErrors = 5;
 let maxToolCalls = 69;
 let warnAtCalls = 55;
 let checkpointAtCalls = 30;
-let checkpointMemoryPath = '/workspace/MEMORY.md';
+let checkpointMemoryPath = '/workspace/memory/YYYY-MM-DD.md';
 
 // Per-session counters keyed by sessionKey
 // { errors: number, totalCalls: number, blocked: boolean, warned: boolean, checkpointIssued: boolean }
 const sessionCounters = new Map();
+
+function resolveCheckpointPath(pathTemplate) {
+  if (typeof pathTemplate !== 'string') return '/workspace/memory/YYYY-MM-DD.md';
+  const today = new Date().toISOString().slice(0, 10);
+  return pathTemplate.replace(/YYYY-MM-DD/g, today);
+}
 
 function getCounter(key) {
   if (!sessionCounters.has(key)) {
@@ -42,7 +48,7 @@ module.exports = {
     maxToolCalls = cfg?.maxToolCalls ?? 69;
     warnAtCalls = cfg?.warnAtCalls ?? 55;
     checkpointAtCalls = cfg?.checkpointAtCalls ?? 30;
-    checkpointMemoryPath = cfg?.checkpointMemoryPath ?? '/workspace/MEMORY.md';
+    checkpointMemoryPath = cfg?.checkpointMemoryPath ?? '/workspace/memory/YYYY-MM-DD.md';
 
     api.logger?.info?.(
       `tool-loop-breaker: registered (maxErrors=${maxConsecutiveErrors}, checkpointAt=${checkpointAtCalls}, maxCalls=${maxToolCalls}, warnAt=${warnAtCalls}, checkpointPath=${checkpointMemoryPath})`
@@ -80,12 +86,13 @@ module.exports = {
       // Checkpoint gate - one-time block to force internal progress checkpoint
       if (counter.totalCalls >= checkpointAtCalls && !counter.checkpointIssued) {
         counter.checkpointIssued = true;
+        const resolvedCheckpointPath = resolveCheckpointPath(checkpointMemoryPath);
         api.logger?.warn?.(
           `tool-loop-breaker: [${sessionKey}] CHECKPOINT REQUIRED at ${counter.totalCalls}/${maxToolCalls} calls`
         );
         return {
           block: true,
-          blockReason: `CHECKPOINT REQUIRED. You have made ${counter.totalCalls} tool calls in this turn. Write a progress checkpoint to memory file path: ${checkpointMemoryPath}. Include completed steps, current state, and next actions. After writing the checkpoint, continue working on the task (do NOT send a user summary yet unless asked).`,
+          blockReason: `CHECKPOINT REQUIRED. You have made ${counter.totalCalls} tool calls in this turn. Write a progress checkpoint to memory file path: ${resolvedCheckpointPath}. Include completed steps, current state, and next actions. After writing the checkpoint, continue working on the task (do NOT send a user summary yet unless asked).`,
         };
       }
 
