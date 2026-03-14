@@ -1,7 +1,7 @@
 {
   "id": "mem0-sidecar",
   "name": "Mem0 Sidecar",
-  "description": "Auto-capture and auto-recall via Mem0 OSS alongside the built-in memory system",
+  "description": "Auto-capture and auto-recall via Mem0 OSS alongside built-in memory system",
   "version": "1.0.0",
   "configSchema": {
     "type": "object",

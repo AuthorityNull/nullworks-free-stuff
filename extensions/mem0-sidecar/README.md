@@ -1,22 +1,22 @@
 # Mem0 Sidecar (`mem0-sidecar`)
 
 ## What it does
-Adds Mem0-based long-term memory alongside OpenClaw's built-in memory flow, with:
+Adds Mem0-based long-term memory alongside built-in memory, with:
 - auto-recall before agent runs
 - auto-capture after runs
 - manual memory tools (`mem0_store`, `mem0_forget`, `mem0_list`)
 
 ## When to use it / why it exists
-- You want durable preference and decision memory across sessions.
+- You want durable preference/decision memory across sessions.
 - You want better recall than plain transcript history.
-- You need explicit memory audit, list, and delete tools.
+- You need explicit memory audit/list/delete tools.
 
 ## How it works (high-level)
-- Initializes Mem0 OSS with configurable embedder, vector store, and LLM backends.
+- Initializes Mem0 OSS with configurable embedder/vector/LLM.
 - `before_agent_start`: searches memories and injects `<mem0-recall>...</mem0-recall>` context.
 - `agent_end`: extracts durable facts, skips noisy sessions/messages, stores memories, then deduplicates by similarity.
-- Provides manual tools to store, list, and delete memory entries.
-- Adds resilience around local history state and transient backend failures.
+- Provides manual tools to store/list/delete memory entries.
+- Adds resilience: SQLite fallback path, uncaught SQLite guard, transient embedding retries, env kill switch.
 
 ## Config reference
 From `openclaw.plugin.json`:
@@ -31,17 +31,17 @@ From `openclaw.plugin.json`:
 - `llm` (object)
 - `historyDbPath` (string)
 
-Common runtime options:
+Used by code (not in manifest schema):
 - `dedupThreshold` (number, default `0.92`)
-- `captureLogPath` (string, optional)
+- `captureLogPath` (string, default `/tmp/mem0-capture.log`)
 - `minCaptureChars` (number, default `100`)
 
 Environment variables:
 - `MEM0_DISABLE` (`true`/`1` disables plugin)
 - `MEM0_USER_ID` (overrides `userId`)
-- `MEM0_HISTORY_DB_PATH` (fallback or override for history DB path)
+- `MEM0_HISTORY_DB_PATH` (fallback/override for history DB path)
 
-## Typical config
+## Typical tweaks
 ```json
 {
   "mem0-sidecar": {
@@ -56,17 +56,17 @@ Environment variables:
 }
 ```
 
+- Increase `topK` for more recall context.
+- Raise `searchThreshold` to reduce weak matches.
+- Raise `dedupThreshold` to keep more near-duplicates.
+
 ## Safe defaults / gotchas
-- Captured memories can include sensitive operational details. Control who can access memory tooling and logs.
-- Heartbeat and other low-signal sessions should usually be skipped from capture.
-- On serious init failure, the plugin should disable itself instead of crashing the gateway.
-- Keep credentials out of committed config. Use environment variables or your secret manager for provider auth.
+- Captured memories can include sensitive operational details - control who can access memory tooling/logs.
+- Heartbeat/noise sessions are intentionally skipped.
+- On serious init failure, plugin disables itself instead of crashing gateway.
 
 ## Validation checklist
-- Startup logs confirm registration with recall and capture settings.
-- Use `mem0_store`, then `mem0_list`, and verify the stored item appears.
-- Start a session with a relevant prompt and confirm `<mem0-recall>` context is injected.
+- Startup log confirms registration with recall/capture settings.
+- Use `mem0_store` then `mem0_list` and verify stored item appears.
+- Start session with relevant prompt and confirm `<mem0-recall>` injection in context.
 - Confirm noisy heartbeat-like interactions are skipped in capture logs.
-
-## Status
-This public page restores the extension docs and link target without publishing any credentials or deployment-specific secrets.

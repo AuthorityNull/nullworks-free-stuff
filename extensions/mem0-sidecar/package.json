@@ -1,6 +1,13 @@
 {
   "name": "mem0-sidecar",
   "version": "1.0.0",
-  "description": "Public documentation bundle for the Mem0 Sidecar OpenClaw extension",
-  "private": true
+  "private": true,
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "dependencies": {
+    "mem0ai": "^2.2.3"
+  }
 }
