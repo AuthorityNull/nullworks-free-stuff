@@ -1,0 +1,6 @@
+{
+  "name": "mem0-sidecar",
+  "version": "1.0.0",
+  "description": "Public documentation bundle for the Mem0 Sidecar OpenClaw extension",
+  "private": true
+}
