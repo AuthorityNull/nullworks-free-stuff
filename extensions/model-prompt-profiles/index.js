@@ -225,6 +225,9 @@ module.exports = {
         providerOverride,
         modelOverride,
       };
+    }, {
+      name: 'model-prompt-profiles.before_model_resolve',
+      description: 'Apply profile-based provider or model overrides before model resolution.'
     });
 
     api.registerHook('before_prompt_build', (event, ctx) => {
@@ -259,6 +262,9 @@ module.exports = {
         prependContext,
         systemPrompt,
       };
+    }, {
+      name: 'model-prompt-profiles.before_prompt_build',
+      description: 'Apply profile-based prompt context or system prompt overrides before prompt assembly.'
     });
   },
 };

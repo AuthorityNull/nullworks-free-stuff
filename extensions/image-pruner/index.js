@@ -272,7 +272,10 @@ const plugin = {
     if (!config.enabled) return;
 
     // FIXED: Use registerHook (not api.on) for hook system
-    api.registerHook('tool_result_persist', handleToolResult);
+    api.registerHook('tool_result_persist', handleToolResult, {
+      name: 'image-pruner.tool_result_persist',
+      description: 'Prune base64 images from persisted tool results and save them to disk.'
+    });
     api.logger.info(`image-pruner: Active - images saved to ${imageDir} with metadata`);
 
     api.registerService({

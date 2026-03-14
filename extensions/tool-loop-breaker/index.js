@@ -42,7 +42,8 @@ function getCounter(key) {
 }
 
 module.exports = {
-  register(api, cfg) {
+  register(api) {
+    const cfg = api.pluginConfig ?? {};
     pluginApi = api;
     maxConsecutiveErrors = cfg?.maxConsecutiveErrors ?? 5;
     maxToolCalls = cfg?.maxToolCalls ?? 69;

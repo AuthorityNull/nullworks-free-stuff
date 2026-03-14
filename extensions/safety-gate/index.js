@@ -15,9 +15,8 @@ const path = require('path');
 let pluginApi = null;
 let config = {};
 
-// Track restart timestamps
-let lastRestartTime = 0;
-const DEFAULT_MIN_RESTART_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
+// One-time reminder state for restart/config actions
+let warnedValidateConfig = false;
 
 // Restart sentinel state
 let restartReason = null;
@@ -93,23 +92,10 @@ module.exports = {
       // --- Gateway tool checks ---
       if (toolName === 'gateway') {
         const action = params.action;
-        const minInterval = config.minRestartIntervalMs || DEFAULT_MIN_RESTART_INTERVAL_MS;
-
-        // Rate-limit restarts/config changes
-        if (action === 'restart' || action === 'config.apply' || action === 'config.patch') {
-          const now = Date.now();
-          const elapsed = now - lastRestartTime;
-
-          if (lastRestartTime > 0 && elapsed < minInterval) {
-            const waitSec = Math.ceil((minInterval - elapsed) / 1000);
-            stats.blocked++;
-            api.logger?.warn?.(`safety-gate: BLOCKED ${action} \u2014 last restart was ${Math.floor(elapsed / 1000)}s ago`);
-            return {
-              block: true,
-              blockReason: `[safety-gate] Restart rate limit: last restart was ${Math.floor(elapsed / 1000)}s ago. ` +
-                `Wait ${waitSec}s. This prevents cascading failures from rapid restarts.`,
-            };
-          }
+        // One-time advisory reminder before restart/config actions
+        if (!warnedValidateConfig && (action === 'restart' || action === 'config.apply' || action === 'config.patch')) {
+          warnedValidateConfig = true;
+          api.logger?.warn?.(`safety-gate: advisory before ${action} - validate config before restart if you changed config, plugins, compose, or prompts`);
         }
 
         // config.apply needs a reason
