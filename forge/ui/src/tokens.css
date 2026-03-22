@@ -1,0 +1,361 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ═══════════════════════════════════════════════════════ */
+  /* CANONICAL PALETTE - Exact hex values from requirements  */
+  /* ═══════════════════════════════════════════════════════ */
+  
+  /* Primary palette */
+  --palette-warm-gray: #acaa9e;
+  --palette-black: #0e0e0c;
+  --palette-dark-gray: #242321;
+  --palette-medium-gray: #2d2b2a;
+  --palette-accent-red: #bc0d13;
+  
+  /* ORYN Dark Theme - using canonical palette */
+  
+  /* Background colors */
+  --color-bg: #0e0e0c;                    /* palette-black */
+  --color-surface: #242321;               /* palette-dark-gray */
+  --color-surface-elevated: #2d2b2a;      /* palette-medium-gray */
+  --color-surface-hover: #2d2b2a;         /* palette-medium-gray */
+  --color-sidebar: #0e0e0c;               /* palette-black */
+  --color-inspector-bg: #242321;          /* palette-dark-gray */
+
+  /* Border colors */
+  --color-border: #2d2b2a;                /* palette-medium-gray */
+  --color-border-subtle: #242321;         /* palette-dark-gray */
+  --color-border-highlight: #3d3b38;      /* darkened warm-gray - subtle center canvas border */
+
+  /* Text colors - warm cream */
+  --color-text-primary: #acaa9e;          /* palette-warm-gray */
+  --color-text-secondary: #8C8A80;        /* Derived from warm-gray */
+  --color-text-disabled: #5C5A54;         /* Derived from warm-gray */
+  --color-text-muted: #74726A;            /* Derived from warm-gray */
+
+  /* Accent - industrial red */
+  --color-accent: #bc0d13;                /* palette-accent-red */
+  --color-accent-hover: #D11A20;          /* Lightened accent */
+  --color-accent-muted: rgba(188, 13, 19, 0.12);
+  --color-accent-subtle: rgba(188, 13, 19, 0.06);
+
+  /* Status colors */
+  --color-success: #2D8C4E;
+  --color-success-muted: rgba(45, 140, 78, 0.12);
+  --color-warning: #B87020;
+  --color-warning-muted: rgba(184, 112, 32, 0.12);
+  --color-danger: #E53422;
+  --color-danger-muted: rgba(229, 52, 34, 0.12);
+  --color-info: #3A7FCC;
+  --color-info-muted: rgba(58, 127, 204, 0.12);
+
+  /* Typography */
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', 'Fira Code', 'SF Mono', 'Consolas', monospace;
+
+  /* Font sizes */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 32px;
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Spacing - 8px base grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Layout */
+  --sidebar-width: 56px;
+  --sidebar-expanded: 180px;
+  --sidebar-width-expanded: 180px;
+  --header-height: 56px;
+  --inspector-width: 360px;
+  --panel-width: 380px;
+  --rail-width: 56px;
+  --rail-expanded: 180px;
+
+  /* Shapes - ZERO radius */
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+
+  /* Motion - mechanical */
+  --transition-fast: 100ms ease-out;
+  --transition-base: 150ms ease-out;
+  --transition-slow: 200ms linear;
+
+  /* Shadows - NONE */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-panel: 250;
+  --z-modal: 300;
+  --z-tooltip: 400;
+}
+
+/* Global reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 !important;
+}
+
+html {
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-mono);
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Film grain noise overlay disabled - it was sitting over iframe previews. */
+body::after {
+  content: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(130, 130, 130, 0.32);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(160, 160, 160, 0.42);
+  background-clip: padding-box;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+/* Crosshair corner decoration utility */
+.crosshair-corners {
+  position: relative;
+}
+
+.crosshair-corners::before,
+.crosshair-corners::after {
+  content: '+';
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: rgba(172, 170, 158, 0.12);
+  line-height: 1;
+}
+
+.crosshair-corners::before {
+  top: 4px;
+  left: 6px;
+}
+
+.crosshair-corners::after {
+  top: 4px;
+  right: 6px;
+}
+
+.crosshair-corners-bottom::before,
+.crosshair-corners-bottom::after {
+  content: '+';
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: rgba(172, 170, 158, 0.12);
+  line-height: 1;
+}
+
+.crosshair-corners-bottom::before {
+  bottom: 4px;
+  left: 6px;
+}
+
+.crosshair-corners-bottom::after {
+  bottom: 4px;
+  right: 6px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes scanLine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes openclawSweep {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 150ms ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.animate-slide-in {
+  animation: slideInRight 150ms ease-out;
+}
+
+/* ORYN section numbering */
+.section-number {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.2em;
+  color: var(--color-text-secondary);
+}
+
+.section-number::after {
+  content: ' >>';
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+
+/* Construction grid lines */
+.grid-lines {
+  background-image:
+    linear-gradient(var(--color-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-subtle) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ORYN Light Theme - warm cream/beige palette using canonical colors */
+[data-theme="light"] {
+  --color-bg: #acaa9e;                    /* palette-warm-gray */
+  --color-surface: #B8B6AA;               /* Lightened warm-gray */
+  --color-surface-elevated: #C6C4B8;      /* Lighter warm-gray */
+  --color-surface-hover: #BFBCB1;         /* Hover state */
+  --color-sidebar: #A3A194;               /* Darkened warm-gray */
+  --color-inspector-bg: #B3B0A4;          /* Surface variant */
+
+  --color-border: #2d2b2a;                /* palette-medium-gray */
+  --color-border-subtle: #6F6B64;         /* Derived */
+  --color-border-highlight: #0e0e0c;      /* palette-black */
+
+  --color-text-primary: #0e0e0c;          /* palette-black */
+  --color-text-secondary: #242321;        /* palette-dark-gray */
+  --color-text-disabled: #5F5B56;         /* Derived */
+  --color-text-muted: #3B3936;            /* Derived */
+
+  --color-accent: #bc0d13;                /* palette-accent-red */
+  --color-accent-hover: #9F0B10;          /* Darkened accent */
+  --color-accent-muted: rgba(188, 13, 19, 0.10);
+  --color-accent-subtle: rgba(188, 13, 19, 0.05);
+
+  --color-success: #2D7A44;
+  --color-success-muted: rgba(45, 122, 68, 0.10);
+  --color-warning: #A06218;
+  --color-warning-muted: rgba(160, 98, 24, 0.10);
+  --color-danger: #C42B2B;
+  --color-danger-muted: rgba(196, 43, 43, 0.10);
+  --color-info: #2E6BAA;
+  --color-info-muted: rgba(46, 107, 170, 0.10);
+}
+
+[data-theme="light"] body::after {
+  content: none;
+  opacity: 0;
+}
+
+[data-theme="light"] .crosshair-corners::before,
+[data-theme="light"] .crosshair-corners::after {
+  color: rgba(14, 14, 12, 0.08);
+}
+
+[data-theme="light"] .crosshair-corners-bottom::before,
+[data-theme="light"] .crosshair-corners-bottom::after {
+  color: rgba(14, 14, 12, 0.08);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(130, 130, 130, 0.32);
+}
+
+[data-theme="light"] ::selection {
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}

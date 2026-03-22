@@ -1,0 +1,86 @@
+:root[data-theme="dark"] {
+  --bg: #0B0F14;
+  --surface: #111925;
+  --surface-2: #1A2533;
+
+  --text: #E8EEF6;
+  --muted-text: #A7B3C3;
+  --border: #2A3444;
+
+  --primary: #C07A3A;
+  --secondary: #2D72D2;
+  --accent: #4CD4C8;
+
+  --success: #2FBF71;
+  --warning: #E9B365;
+  --danger: #E05252;
+  --info: #3D78E6;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  --font-ui: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-pixel: "Geist Pixel", "Geist Mono", monospace;
+
+  --focus-ring: var(--accent);
+}
+
+:root[data-theme="light"] {
+  --bg: #F3F5F8;
+  --surface: #FFFFFF;
+  --surface-2: #EAF0F7;
+
+  --text: #0C1018;
+  --muted-text: #5C6477;
+  --border: #D1D7E5;
+
+  --primary: #A5662D;
+  --secondary: #285CC0;
+  --accent: #1F8F96;
+
+  --success: #268B60;
+  --warning: #C7892E;
+  --danger: #C83F3F;
+  --info: #285CC0;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  --font-ui: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-pixel: "Geist Pixel", "Geist Mono", monospace;
+
+  --focus-ring: var(--accent);
+}
+
+:root {
+  --app-shell-bg: var(--bg);
+  --panel-bg: var(--surface);
+  --card-bg: var(--surface);
+  --card-bg-elevated: var(--surface-2);
+  --card-border: var(--border);
+
+  --button-primary-bg: var(--primary);
+  --button-secondary-bg: var(--surface-2);
+  --button-danger-bg: var(--danger);
+
+  --status-success: var(--success);
+  --status-warning: var(--warning);
+  --status-danger: var(--danger);
+  --status-info: var(--info);
+}
