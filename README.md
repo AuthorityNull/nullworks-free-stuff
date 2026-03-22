@@ -29,11 +29,11 @@ npm run build
 
 ## Review status
 
-This export was assembled from a larger private repository, then manually pruned and reviewed for:
+This export was assembled from a broader working tree, then manually pruned and reviewed for:
 
 - secrets and token-like material
 - private hostnames and host paths
 - tunnel and runtime auth artifacts
 - internal-only operational docs and deployment files
 
-No public push has been performed by this file alone. Review the final diff and remote configuration before publishing.
+Review the final diff and remote configuration before publishing.
